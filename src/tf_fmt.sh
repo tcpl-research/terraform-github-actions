@@ -6,7 +6,6 @@ function terraformFmt {
   if [ "${tfWorkingDir}" == "" ] || [ "${tfWorkingDir}" == "" ]; then
     cd ${GITHUB_WORKSPACE}
   else
-    echo "DEBUG1"
     cd ${GITHUB_WORKSPACE}/${tfWorkingDir}
   fi
 
@@ -14,7 +13,6 @@ function terraformFmt {
   # OUTPUT=$(sh -c "terraform fmt -no-color -check -list -recursive $*" 2>&1)
   OUTPUT=$(terraform fmt -no-color -check -list -recursive)
   SUCCESS=${?}
-  echo "DEBUG2"
   echo "${OUTPUT}"
   set -e
 
@@ -38,10 +36,8 @@ ${OUTPUT}
     # Otherwise the output will contain a list of unformatted filenames.
     # Iterate through each file and build up a comment containing the diff
     # of each file.
-    echo "DEBUG3"
     COMMENT=""
     for file in ${OUTPUT}; do
-      echo "DEBUG4"
       FILE_DIFF=$(terraform fmt -no-color -write=false -diff "${file}" | sed -n '/@@.*/,//{/@@.*/d;p}')
       COMMENT="${COMMENT}
 <details><summary><code>${file}</code></summary>
@@ -51,20 +47,21 @@ ${FILE_DIFF}
 </details>
 "
     done
-    echo "DEBUG5"
   fi
 
   if [ "${GITHUB_EVENT_NAME}" == "pull_request" ]; then
-    echo "DEBUG6"
     COMMENT_WRAPPER="#### \`terraform fmt\` Failed
 ${COMMENT}
 *Workflow: \`${GITHUB_WORKFLOW}\`, Action: \`${GITHUB_ACTION}\`*
 "
     PAYLOAD=$(echo '{}' | jq --arg body "${COMMENT_WRAPPER}" '.body = $body')
     COMMENTS_URL=$(cat ${GITHUB_EVENT_PATH} | jq -r .pull_request.comments_url)
-    curl -s -S --header "Authorization: token ${GITHUB_TOKEN}" --header "Content-Type: application/json" --data "${PAYLOAD}" "${COMMENTS_URL}" > /dev/null
+    # curl -s -S --header "Authorization: token ${GITHUB_TOKEN}" --header "Content-Type: application/json" --data "${PAYLOAD}" "${COMMENTS_URL}" > /dev/null
+    curl --header "Authorization: token ${GITHUB_TOKEN}" --header "Content-Type: application/json" --data "${PAYLOAD}" "${COMMENTS_URL}"
+    
     echo "DEBUG7"
 
+    echo "${SUCCESS}"
     exit ${SUCCESS}
   fi
 }
