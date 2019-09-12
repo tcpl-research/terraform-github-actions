@@ -1,0 +1,10 @@
+name: 'Terraform GitHub Actions'
+description: 'Runs Terraform commands via GitHub Actions'
+author: 'HashiCorp, Inc.'
+inputs:
+  terraform_version:
+    description: 'Terraform version to install'
+    required: true
+runs:
+  using: 'docker'
+  image: './Dockerfile'
