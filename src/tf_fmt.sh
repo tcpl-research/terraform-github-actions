@@ -41,6 +41,7 @@ ${OUTPUT}
       FILE_DIFF=$(terraform fmt -no-color -write=false -diff "${file}" | sed -n '/@@.*/,//{/@@.*/d;p}')
       COMMENT="${COMMENT}
 <details><summary><code>${file}</code></summary>
+
 \`\`\`diff
 ${FILE_DIFF}
 \`\`\`
@@ -56,12 +57,8 @@ ${COMMENT}
 "
     PAYLOAD=$(echo '{}' | jq --arg body "${COMMENT_WRAPPER}" '.body = $body')
     COMMENTS_URL=$(cat ${GITHUB_EVENT_PATH} | jq -r .pull_request.comments_url)
-    # curl -s -S --header "Authorization: token ${GITHUB_TOKEN}" --header "Content-Type: application/json" --data "${PAYLOAD}" "${COMMENTS_URL}" > /dev/null
-    curl --header "Authorization: token ${GITHUB_TOKEN}" --header "Content-Type: application/json" --data "${PAYLOAD}" "${COMMENTS_URL}"
+    curl -s -S --header "Authorization: token ${GITHUB_TOKEN}" --header "Content-Type: application/json" --data "${PAYLOAD}" "${COMMENTS_URL}" > /dev/null
     
-    echo "DEBUG7"
-
-    echo "${SUCCESS}"
     exit ${SUCCESS}
   fi
 }
