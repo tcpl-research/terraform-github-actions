@@ -29,6 +29,7 @@ function debug {
   pwd
   ls -la
   printenv
+
   cat ${GITHUB_EVENT_PATH}
 }
 
